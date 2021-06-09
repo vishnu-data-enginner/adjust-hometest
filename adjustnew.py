@@ -41,6 +41,8 @@ df.orderBy(df['commits count'].desc()).show(10)
 # COMMAND ----------
 
 ##Top 10 repositories by amount of watch events (repo name, watch events count)
+repojoincommits = repos.join(watchevent, repos.id == watchevent.repo_id,"inner").drop(watchevent.repo_id)
+#repopushcount = repojoincommits.select("name","type").groupby("name").agg(count("type").alias("typ"))
 win = Window.partitionBy("name").orderBy(repojoincommits['type'].desc())
-df = repojoincommits.select("name","type", rank().over(win).alias('commitscount')).filter(col('commitscount') <= 20).groupBy(("name")).agg(count("type").alias("watch events count"))
+df = repojoincommits.select("name","type", rank().over(win).alias('commitscount')).filter(col('commitscount') <= 20).groupBy("name").agg(count("type").alias("watch events count"))
 df.orderBy(df['watch events count'].desc()).show(10)
